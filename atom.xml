@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://jhonprice.github.io</id>
+    <title>因幡组员13号</title>
+    <updated>2022-09-12T01:35:51.987Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://jhonprice.github.io"/>
+    <link rel="self" href="https://jhonprice.github.io/atom.xml"/>
+    <subtitle>&apos;I have nothing to offer but blood, toil, tears and sweat.&apos;</subtitle>
+    <logo>https://jhonprice.github.io/images/avatar.png</logo>
+    <icon>https://jhonprice.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2022, 因幡组员13号</rights>
+    <entry>
+        <title type="html"><![CDATA[RTR4：图形处理单元与渲染管道实现 v0.01]]></title>
+        <id>https://jhonprice.github.io/post/rtr4tu-xing-chu-li-dan-yuan-yu-xuan-ran-guan-dao-shi-xian-v001/</id>
+        <link href="https://jhonprice.github.io/post/rtr4tu-xing-chu-li-dan-yuan-yu-xuan-ran-guan-dao-shi-xian-v001/">
+        </link>
+        <updated>2022-09-12T01:31:29.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[RTR4：图形渲染管线 v0.01]]></title>
+        <id>https://jhonprice.github.io/post/rtr4tu-xing-xuan-ran-guan-xian-v001/</id>
+        <link href="https://jhonprice.github.io/post/rtr4tu-xing-xuan-ran-guan-xian-v001/">
+        </link>
+        <updated>2022-09-12T01:18:54.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[FirstWeekend理论点整理]]></title>
+        <id>https://jhonprice.github.io/post/firstweekend-li-lun-dian-zheng-li/</id>
+        <link href="https://jhonprice.github.io/post/firstweekend-li-lun-dian-zheng-li/">
+        </link>
+        <updated>2022-08-29T04:52:08.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[更新进度]]></title>
+        <id>https://jhonprice.github.io/post/geng-xin-jin-du/</id>
+        <link href="https://jhonprice.github.io/post/geng-xin-jin-du/">
+        </link>
+        <updated>2022-08-28T13:54:43.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Hello Gridea]]></title>
+        <id>https://jhonprice.github.io/post/hello-gridea/</id>
+        <link href="https://jhonprice.github.io/post/hello-gridea/">
+        </link>
+        <updated>2022-08-23T08:16:07.000Z</updated>
+        <summary type="html"><![CDATA[<p>👏  欢迎使用 <strong>Gridea</strong> ！<br>
+✍️  <strong>Gridea</strong> 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ...</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>👏  欢迎使用 <strong>Gridea</strong> ！<br>
+✍️  <strong>Gridea</strong> 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ...</p>
+]]></content>
+    </entry>
+</feed>

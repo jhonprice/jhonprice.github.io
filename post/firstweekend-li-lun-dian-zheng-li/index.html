@@ -1,0 +1,422 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FirstWeekend理论点整理 | 因幡组员13号</title>
+<link rel="shortcut icon" href="https://jhonprice.github.io/favicon.ico?v=1662946543871">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jhonprice.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="FirstWeekend理论点整理 | 因幡组员13号 - Atom Feed" href="https://jhonprice.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="1. Starter
+
+PPM格式
+
+格式如下：
+
+P3
+3 2
+255
+0 255 63
+127 255 63
+255 255 63
+0 0 63
+127 0 63
+255 0 63
+
+
+实验陷阱：windows下重定向输出的ppm格式为..." />
+    <meta name="keywords" content="计算机图形学,光线追踪" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://jhonprice.github.io">
+  <img class="avatar" src="https://jhonprice.github.io/images/avatar.png?v=1662946543871" alt="">
+  </a>
+  <h1 class="site-title">
+    因幡组员13号
+  </h1>
+  <p class="site-description">
+    'I have nothing to offer but blood, toil, tears and sweat.'
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              FirstWeekend理论点整理
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-08-29
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+                <a href="https://jhonprice.github.io/tag/esjk2vzv5/" class="post-tag">
+                  # 计算机图形学
+                </a>
+              
+                <a href="https://jhonprice.github.io/tag/rvdSBx4Bic/" class="post-tag">
+                  # 光线追踪
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://raytracing.github.io/images/img-1.21-book1-final.jpg" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="1-starter">1. Starter</h1>
+<figure data-type="image" tabindex="1"><img src="https://raytracing.github.io/images/img-1.01-first-ppm-image.png" alt="Untitled" loading="lazy"></figure>
+<h2 id="ppm格式">PPM格式</h2>
+<ul>
+<li>格式如下：</li>
+</ul>
+<pre><code class="language-cpp">P3
+3 2
+255
+0 255 63
+127 255 63
+255 255 63
+0 0 63
+127 0 63
+255 0 63
+</code></pre>
+<ul>
+<li>实验陷阱：windows下重定向输出的ppm格式为utf16,会导致honeyviewer等软件无法显示图片</li>
+</ul>
+<h2 id="vs-c语言特性">VS C++语言特性</h2>
+<ul>
+<li><strong><code>region</code> and <code>endregion</code> pragma</strong></li>
+<li>auto与类型转换</li>
+<li>标准输入输出流</li>
+<li>std::sqrt</li>
+<li>类，构造方法，方法const，操作符重载，inline方法，</li>
+<li>using别名</li>
+<li>引用 &amp;</li>
+</ul>
+<h2 id="图形学">图形学</h2>
+<ul>
+<li>向量，点，颜色 (vec.h color.h</li>
+</ul>
+<h1 id="2-raycameraandbackground">2. RayCameraAndBackGround</h1>
+<figure data-type="image" tabindex="2"><img src="https://jhonprice.github.io/post-images/1661749113032.png" alt="" loading="lazy"></figure>
+<h2 id="图形学-2">图形学</h2>
+<ul>
+<li>光线，射线</li>
+<li>线性插值(ray.h)</li>
+<li>视口的创建（原始的相机系统</li>
+<li>光线与球相交的算法</li>
+</ul>
+<h1 id="3-surfacenormalandcleancode">3. SurfaceNormalAndCleanCode</h1>
+<figure data-type="image" tabindex="3"><img src="https://raytracing.github.io/images/img-1.04-normals-sphere.png" alt="Untitled" loading="lazy"></figure>
+<h2 id="图形学-3">图形学</h2>
+<ul>
+<li>如何可视化法线（一种调试方法</li>
+<li>简化一元二次方程的求解公式（没看出来区别</li>
+</ul>
+<h1 id="4-multipleobjectandcodeclean">4. MultipleObjectAndCodeClean</h1>
+<figure data-type="image" tabindex="4"><img src="https://raytracing.github.io/images/img-1.05-normals-sphere-ground.png" alt="Untitled" loading="lazy"></figure>
+<h2 id="vs-c-特性">VS C++ 特性</h2>
+<ul>
+<li>智能指针</li>
+<li>vector</li>
+<li>number_limits</li>
+<li>类：public继承，虚方法，override (hittable.h hitlist.h</li>
+</ul>
+<h2 id="图形学-4">图形学</h2>
+<ul>
+<li>向量：点积判断朝向一致</li>
+<li>在一定的t范围内才计算光线相交（一种近似方式</li>
+<li>球与光线相交的抽象 (sphere.h hittable.h hitlist.h</li>
+</ul>
+<h1 id="5-antialiasing">5. Antialiasing</h1>
+<figure data-type="image" tabindex="5"><img src="https://jhonprice.github.io/post-images/1661749230563.png" alt="" loading="lazy"></figure>
+<h2 id="vs-c-特性-2">VS C++ 特性</h2>
+<ul>
+<li>random库，c的random函数</li>
+</ul>
+<h2 id="图形学-5">图形学</h2>
+<ul>
+<li>相机逻辑的抽象 (camera.h</li>
+<li>反走样（使用多个样本生成像素</li>
+</ul>
+<h1 id="6-diffuse-material">6. Diffuse Material</h1>
+<figure data-type="image" tabindex="6"><img src="https://jhonprice.github.io/post-images/1661749430126.png" alt="" loading="lazy"></figure>
+<h2 id="图形学-6">图形学</h2>
+<ul>
+<li>
+<p>光线的反射与吸收理论</p>
+</li>
+<li>
+<p>漫反射的理论</p>
+</li>
+<li>
+<p>漫反射的随机采样实现方法（见纸质资料图 vec3.h</p>
+</li>
+<li>
+<p>实际问题：光线反射次数与递归</p>
+</li>
+<li>
+<p>gamma矫正 与gamma2</p>
+</li>
+<li>
+<p>实际问题：Shadow Acne的修复（浮点数精度问题</p>
+</li>
+<li>
+<p>朗伯反射与随机方式的区别（概率角度</p>
+</li>
+<li>
+<p>半球反射的实现方法</p>
+</li>
+</ul>
+<h1 id="7-metal-material">7. Metal Material</h1>
+<figure data-type="image" tabindex="7"><img src="https://jhonprice.github.io/post-images/1661749447009.png" alt="" loading="lazy"></figure>
+<h2 id="vs-c-特性-3">VS C++ 特性</h2>
+<ul>
+<li>引用循环与#pragma once</li>
+</ul>
+<h2 id="图形学-7">图形学</h2>
+<ul>
+<li>
+<p>关于材质的抽象(光的衰减，光的散射反射方向 material.h hit_record.h sphere.h</p>
+</li>
+<li>
+<p>光的衰减，光的散射，反射理论</p>
+</li>
+<li>
+<p>实际问题：漫反射中，随机散射产生0向量的情况与负值的处理</p>
+</li>
+<li>
+<p>镜面反射理论与实现 （图11 (vec3.h material.h</p>
+</li>
+<li>
+<p>模糊反射理论与实现（图12 （material.h</p>
+</li>
+<li>
+<p>总结：随机产生偏差的方法（总结模糊反射与随机漫反射的共同点</p>
+<ul>
+<li>tips：产生单位圆中的偏移向量</li>
+</ul>
+</li>
+</ul>
+<h1 id="8-dielectrics-折射介质">8. Dielectrics 折射介质</h1>
+<figure data-type="image" tabindex="8"><img src="https://jhonprice.github.io/post-images/1661749462028.png" alt="" loading="lazy"></figure>
+<h2 id="图形学-8">图形学</h2>
+<ul>
+<li>斯内尔Snell折射理论与实现 vec3.h</li>
+<li>实际问题：Snell的解是否一定存在</li>
+<li>全内反射的理论与实现  material.h</li>
+<li>Schlick Approximation 与菲涅尔方程的理论与实现</li>
+<li>实际问题：创造空心玻璃球的方法</li>
+</ul>
+<h1 id="9-positionablecamera-1-and-2">9. PositionableCamera 1 And 2</h1>
+<p><img src="https://jhonprice.github.io/post-images/1661749474888.png" alt="" loading="lazy"><br>
+<img src="https://jhonprice.github.io/post-images/1661749480836.png" alt="" loading="lazy"><br>
+<img src="https://jhonprice.github.io/post-images/1661749487463.png" alt="" loading="lazy"></p>
+<h2 id="图形学-9">图形学</h2>
+<ul>
+<li>相机的视角概念和实现（图14</li>
+<li>相机坐标系的构建和实现（camera.h</li>
+</ul>
+<h1 id="10-defocusblurandnewcamera">10. DefocusBlurAndNewCamera</h1>
+<figure data-type="image" tabindex="9"><img src="https://jhonprice.github.io/post-images/1661749494931.png" alt="" loading="lazy"></figure>
+<h2 id="图形学-10">图形学</h2>
+<ul>
+<li>不明白：景深的概念与实现（vec3.h  camera.h
+<ul>
+<li>焦距</li>
+</ul>
+</li>
+</ul>
+<h1 id="11-final-render">11. <strong>Final Render</strong></h1>
+<figure data-type="image" tabindex="10"><img src="https://raytracing.github.io/images/img-1.21-book1-final.jpg" alt="Untitled" loading="lazy"></figure>
+<h2 id="待解决问题">待解决问题：</h2>
+<ul>
+<li>太慢</li>
+</ul>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#1-starter">1. Starter</a>
+<ul>
+<li><a href="#ppm%E6%A0%BC%E5%BC%8F">PPM格式</a></li>
+<li><a href="#vs-c%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7">VS C++语言特性</a></li>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6">图形学</a></li>
+</ul>
+</li>
+<li><a href="#2-raycameraandbackground">2. RayCameraAndBackGround</a>
+<ul>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-2">图形学</a></li>
+</ul>
+</li>
+<li><a href="#3-surfacenormalandcleancode">3. SurfaceNormalAndCleanCode</a>
+<ul>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-3">图形学</a></li>
+</ul>
+</li>
+<li><a href="#4-multipleobjectandcodeclean">4. MultipleObjectAndCodeClean</a>
+<ul>
+<li><a href="#vs-c-%E7%89%B9%E6%80%A7">VS C++ 特性</a></li>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-4">图形学</a></li>
+</ul>
+</li>
+<li><a href="#5-antialiasing">5. Antialiasing</a>
+<ul>
+<li><a href="#vs-c-%E7%89%B9%E6%80%A7-2">VS C++ 特性</a></li>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-5">图形学</a></li>
+</ul>
+</li>
+<li><a href="#6-diffuse-material">6. Diffuse Material</a>
+<ul>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-6">图形学</a></li>
+</ul>
+</li>
+<li><a href="#7-metal-material">7. Metal Material</a>
+<ul>
+<li><a href="#vs-c-%E7%89%B9%E6%80%A7-3">VS C++ 特性</a></li>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-7">图形学</a></li>
+</ul>
+</li>
+<li><a href="#8-dielectrics-%E6%8A%98%E5%B0%84%E4%BB%8B%E8%B4%A8">8. Dielectrics 折射介质</a>
+<ul>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-8">图形学</a></li>
+</ul>
+</li>
+<li><a href="#9-positionablecamera-1-and-2">9. PositionableCamera 1 And 2</a>
+<ul>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-9">图形学</a></li>
+</ul>
+</li>
+<li><a href="#10-defocusblurandnewcamera">10. DefocusBlurAndNewCamera</a>
+<ul>
+<li><a href="#%E5%9B%BE%E5%BD%A2%E5%AD%A6-10">图形学</a></li>
+</ul>
+</li>
+<li><a href="#11-final-render">11. <strong>Final Render</strong></a>
+<ul>
+<li><a href="#%E5%BE%85%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98">待解决问题：</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://jhonprice.github.io/post/geng-xin-jin-du/">
+              <h3 class="post-title">
+                更新进度
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://jhonprice.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

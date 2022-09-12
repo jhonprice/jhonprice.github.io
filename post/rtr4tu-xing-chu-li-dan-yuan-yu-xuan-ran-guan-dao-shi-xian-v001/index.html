@@ -1,0 +1,471 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RTR4：图形处理单元与渲染管道实现 v0.01 | 因幡组员13号</title>
+<link rel="shortcut icon" href="https://jhonprice.github.io/favicon.ico?v=1662946543871">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://jhonprice.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="RTR4：图形处理单元与渲染管道实现 v0.01 | 因幡组员13号 - Atom Feed" href="https://jhonprice.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="第三章
+
+GPU为一小部分高并行化的任务提供了加速，如z缓冲区，访问纹理图像和其他缓冲区，查找三角形覆盖的像素提供了定制芯片 ch23
+本章介绍GPU 如何为其可编程着色器实现并行性
+着色器是如何工作的：ch3.3
+
+着色器的核心是小型处理..." />
+    <meta name="keywords" content="RTR4,图形渲染管线,计算机图形学" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://jhonprice.github.io">
+  <img class="avatar" src="https://jhonprice.github.io/images/avatar.png?v=1662946543871" alt="">
+  </a>
+  <h1 class="site-title">
+    因幡组员13号
+  </h1>
+  <p class="site-description">
+    'I have nothing to offer but blood, toil, tears and sweat.'
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              RTR4：图形处理单元与渲染管道实现 v0.01
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-09-12
+              </span>
+              <span>
+                11 min read
+              </span>
+              
+                <a href="https://jhonprice.github.io/tag/kEoDJdpbn/" class="post-tag">
+                  # RTR4
+                </a>
+              
+                <a href="https://jhonprice.github.io/tag/6v1Om9dAM6/" class="post-tag">
+                  # 图形渲染管线
+                </a>
+              
+                <a href="https://jhonprice.github.io/tag/esjk2vzv5/" class="post-tag">
+                  # 计算机图形学
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://data.simonschreibt.de/gat049/banner_book_02.jpg" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="第三章">第三章</h1>
+<ul>
+<li>GPU为一小部分高并行化的任务提供了加速，如z缓冲区，访问纹理图像和其他缓冲区，查找三角形覆盖的像素提供了定制芯片 ch23</li>
+<li>本章介绍GPU 如何为其可编程着色器实现并行性</li>
+<li>着色器是如何工作的：ch3.3
+<ul>
+<li>着色器的核心是小型处理器，执行相对独立的任务，如transform，fragment计算</li>
+<li>数量级：每帧都有数千或数百万个三角形发送到屏幕，每秒可能有数十亿次着色器调用</li>
+</ul>
+</li>
+<li>存在的问题: 等待数据会降低性能
+<ul>
+<li>延迟：访问数据需要一些时间。判断延迟的一个基本方法是，信息离处理器越远，等待的时间就越长 ch23.3</li>
+<li>存储在内存芯片中的信息将需要比本地寄存器中更长的时间来访问，内存访问：ch18.4.1</li>
+</ul>
+</li>
+</ul>
+<h1 id="31-数据并行架构">3.1 数据并行架构</h1>
+<ul>
+<li>
+<p>CPU的特点与如何处理停顿</p>
+<ul>
+<li>CPU：多个处理器，每个处理器串行，（SIMD矢量运算除外</li>
+<li>大量使用本地缓存，CPU 还通过使用诸如分支预测、指令重新排序、寄存器重命名和缓存预取等巧妙技术来避免停顿</li>
+</ul>
+</li>
+<li>
+<p>GPU的特点</p>
+<ul>
+<li>GPU：含有大量处理器，称着色器内核（通常数千个</li>
+<li>GPU是流处理器，即数据与操作统一，各自相对独立，潜在的代价是可能存在等待情况</li>
+<li>GPU针对吞吐量（处理数据的最大速率）进行优化，相对高速缓存和控制逻辑在芯片的占比少，故单个内核的延迟要比CPU高，详细见参考</li>
+</ul>
+</li>
+<li>
+<p>引入：一个运行实例</p>
+<blockquote>
+<p>假设一个网格被光栅化，两千个像素有片段需要处理；一个像素着色<br>
+器程序将被调用两千次。想象一下，只有一个着色器处理器，世界上最弱<br>
+的 GPU。它开始为两千个片段中的第一个片段执行着色器程序。着色器处<br>
+理器对寄存器中的值执行一些算术运算。寄存器是本地的并且可以快速</p>
+<p>访问，因此不会发生停顿。着色器处理器随后会执行诸如纹理访问之类的<br>
+指令；例如，对于给定的表面位置，程序需要知道应用于网格的图像的像<br>
+素颜色。纹理是完全独立的资源，不是像素程序本地内存的一部分，并且<br>
+可能会涉及纹理访问。内存获取可能需要数百到数千个时钟周期，在此期<br>
+间 GPU 处理器什么都不做。此时着色器处理器将停止，等待返回纹理的<br>
+颜色值。<br>
+为了让这个糟糕的 GPU 变得更好，给每个片段一个小的存储空间来存<br>
+放它的本地寄存器。现在，着色器处理器不再暂停纹理提取，而是允许切<br>
+换并执行另一个片段，即两千个片段中的第二个。这个切换非常快，除了<br>
+注意第一个片段上执行的是哪条指令外，第一个或第二个片段中的任何内<br>
+容都不会受到影响。现在执行第二个片段。与第一个相同，执行一些算术<br>
+函数，然后再次遇到纹理提取。着色器核心现在切换到另一个片段，第三<br>
+个。最终，所有两千个片段都以这种方式处理。此时，着色器处理器返回<br>
+到第一个片段。此时纹理颜色已被提取并可供使用，因此着色器程序可以<br>
+继续执行。 处理器以相同的方式继续执行，直到遇到另一条已知会停止<br>
+执行的指令，或者程序完成。与着色器处理器一直专注于它相比，单个片<br>
+段的执行时间会更长，但作为一个整体的片段的总体执行时间会大大减少</p>
+</blockquote>
+</li>
+<li>
+<p>SIMD：单指令多数据</p>
+<ul>
+<li>上述实例通过切换到另一个片段让GPU保持忙碌来隐藏延迟，进一步的，分离指令执行逻辑与数据，即SIMD</li>
+<li>优势：比单独逻辑+调度单元比，需要的芯片和功率更少</li>
+</ul>
+</li>
+<li>
+<p>运行实例的GPU实现</p>
+<ul>
+<li>线程：片段的每个着色器调用被称为1个线程（包含有所有需要的内存寄存器数据与空间</li>
+<li>warps或wavefronts：使用相同着色器程序的线程被打包成组，每组被8-64个着色器内核通过SIMD方式处理使用</li>
+<li>每个线程被映射到一个SIMD lane（SIMD通道）</li>
+<li>执行过程：
+<ul>
+<li>根据程序线程数量和warp包含的线程数量划分warp</li>
+<li>执行一波warp，其中的线程同步执行，遇到内存提取则停止（stall）</li>
+<li>(swap)换上新一波warp，继续计算</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>warp替换时为何代价较小</p>
+<ul>
+<li>数据和状态绑在线程上，swap只是使处理器切换下对象</li>
+</ul>
+</li>
+<li>
+<p>性能指标：</p>
+<ul>
+<li>warp-swap技术的关键指标是占用率，即gpu上的线程越多，warp越多，则占用率高，这最终取决于线程携带的数据大小与gpu上寄存器的大小的关系</li>
+<li>低占用率会导致性能不佳，内存获取的频率也会影响需要隐藏多少延迟，详细见参考</li>
+</ul>
+</li>
+<li>
+<p>其他性能问题</p>
+<ul>
+<li>分支，由“if”语句和循环引起的问题：
+<ul>
+<li>假设在着色器程序中遇到“if”语句。如果所有线程都评估并采用相同的<br>
+分支，则warp可以继续，而不用担心另一个分支。</li>
+<li>然而，如果一些线程，甚至一个线程，采用备用路径，那么warp必须执行两个分支，丢弃每个特定线程不需要的结果 [530, 945]。这个问题称为线程发散</li>
+<li>其中一些线程可能需要执行循环迭代或执行 warp 中的其他线程不需要的“if”路径，<br>
+在此期间让它们处于空闲状态</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="32-gpu流水线简介">3.2 GPU流水线简介</h1>
+<ul>
+<li>流水线的可编程性：
+<ul>
+<li>屏幕映射和合并可设置</li>
+<li>剪裁与光栅化固定</li>
+<li>其余可编程</li>
+</ul>
+</li>
+<li>逻辑管道的实现取决于硬件提供商：ch18 ch23
+<ul>
+<li>逻辑模型可以帮助您推断影响性能的因素，但不应将其误认为 GPU 实际实现管道的方式。</li>
+</ul>
+</li>
+</ul>
+<h1 id="33-可编程着色器阶段">3.3 可编程着色器阶段</h1>
+<ul>
+<li>各类着色器共享一个通用编程模型，具有相同的指令集架构 ISA</li>
+<li>该模型由通用着色器核心处理器实现，来处理负载均衡等具体任务</li>
+<li>DirectX的着色器语言（略）</li>
+<li>基本数据类型是32单精度浮点标量和向量，整数最常用于表示计数器、索引<br>
+或位掩码。还支持聚合数据类型，例如结构、数组和矩阵。</li>
+<li>每个可编程着色器阶段都有两种类型的输入：统一输入，其值在整个绘制调用中保持不变（但可以在绘制调用之间更改），以及变化的输入，来自三角形顶点或光栅化的数据</li>
+</ul>
+<hr>
+<ul>
+<li>底层虚拟机为不同类型的输入和输出提供特殊的寄存器。各自数量取决于具体功能
+<ul>
+<li>变量输入寄存器</li>
+<li>输出寄存器</li>
+<li>常量寄存器（多）</li>
+<li>临时寄存器（多）</li>
+<li>纹理 （其次）</li>
+</ul>
+</li>
+<li>术语流控制是指使用分支指令来改变代码执行的流程。
+<ul>
+<li>静态控制流</li>
+<li>动态控制流（性能问题</li>
+</ul>
+</li>
+</ul>
+<h1 id="34-可编程着色和api演变">3.4 可编程着色和API演变</h1>
+<p>（略）</p>
+<h1 id="35-顶点着色器">3.5 顶点着色器</h1>
+<ul>
+<li>输入组装器 input assembler
+<ul>
+<li>数据表示 ch16.4.5</li>
+<li>实例化 ch18.4.2</li>
+</ul>
+</li>
+<li>三角形网格：
+<ul>
+<li>顶点</li>
+<li>可选属性：颜色，纹理，曲面法线</li>
+<li>使用三角形网格来 表示一个基础曲面（underlying curved surface），而顶点法线则用来表示这个曲面的方向，而不是三角形网格本身的方向</li>
+<li>计算顶点法线的方法: ch16.3.4</li>
+</ul>
+</li>
+<li>功能
+<ul>
+<li>修改创建忽略每个顶点相关的值，颜色，法线，纹理坐标，位置</li>
+<li>模型空间→同质裁剪空间 homogeneous clip space ch4.7</li>
+<li>最少：必须输出位置</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><em>输入组装通常呈现为在执行顶点着色器之前发生的过程。这是物理模<br>
+型通常与逻辑模型不同的示例。从物理上讲，创建顶点的数据获取可能发<br>
+生在顶点着色器中，驱动程序会悄悄地为每个着色器添加适当的指令，程<br>
+序员看不到。</em></p>
+</blockquote>
+<ul>
+<li>用途：
+<ul>
+<li>动画关节的顶点混合</li>
+<li>轮廓渲染</li>
+<li>对象生成：by creating a mesh only once and having it be deformed（变形）</li>
+<li>使用蒙皮和变形技术为角色的身体和面部设置动画</li>
+<li>程序变形，例如旗帜、布料或水的移动 [802、943]</li>
+<li>粒子创建，通过沿管道发送退化（无区域）网格并根据需要为这些网格指定区域。</li>
+<li>镜头失真、热雾、水波纹、页面卷曲和其他效果，通过使用整个帧缓冲区的内容作为屏幕对齐网格上的纹理进行程序变形。</li>
+<li>通过使用顶点纹理提取应用地形高度场 [40, 1227]</li>
+</ul>
+</li>
+</ul>
+<h1 id="36-镶嵌阶段">3.6 镶嵌阶段</h1>
+<ul>
+<li>作用：根据需要对模型进行细分</li>
+<li>组成：（DirectX和Openg）
+<ul>
+<li>外壳着色器（曲面细分控制器）</li>
+<li>曲面细分着色器（固定）</li>
+<li>域着色器（曲面细分评估器）</li>
+</ul>
+</li>
+<li>目的：（TODO）</li>
+<li>参考：ch17 ch17.8 ch22.8</li>
+</ul>
+<h1 id="37-几何着色器">3.7 几何着色器</h1>
+<ul>
+<li>参考：ch10.4.3</li>
+<li>（TODO）</li>
+</ul>
+<h2 id="371-流输出">3.7.1 流输出</h2>
+<ul>
+<li>参考: ch13.8 ch4.4</li>
+<li>在 OpenGL 中，流输出阶段称为变换反馈</li>
+<li>（TODO）</li>
+</ul>
+<h1 id="38-像素着色器">3.8 像素着色器</h1>
+<ul>
+<li>光栅化器还可以粗略地计算三角形覆盖了每个像素的单元区域的程度（ ch5.4.2 ）</li>
+<li>延迟着色 ch20.1</li>
+<li>处理相邻像素 ch12.1</li>
+<li>像素着色器提供了任何内插值沿 x 和 y 屏幕轴每个像素的<br>
+变化量。这些值对于各种计算和纹理寻址很有用。这些梯度对于诸如纹理<br>
+过滤（ch6.2.2）之类的操作特别重要</li>
+<li>（TODO）</li>
+</ul>
+<h1 id="39合并阶段">3.9合并阶段</h1>
+<ul>
+<li>透明度ch5.5</li>
+<li>early-z 测试 ch23 ch18.4.5</li>
+<li>（TODO）</li>
+</ul>
+<h1 id="310-计算着色器">3.10 计算着色器</h1>
+<ul>
+<li>（TODO）</li>
+</ul>
+<h1 id="参考">参考</h1>
+<ul>
+<li>CPU的架构与相关技术：715</li>
+<li>GPU芯片相关：462</li>
+<li>warp切换的其他优化技术 945</li>
+<li>占用率如何受寄存器数量和着色器使用的共享内存的影响 993</li>
+<li>理想的占用率如何根据着色器执行的操作类型而变化 1911 1914</li>
+<li>由“if”语句和循环引起的性能问题：530 945</li>
+<li>DirextX的输入组装器175 530 1208</li>
+<li>程序变形，例如旗帜、布料或水的移动  802 943</li>
+<li>通过使用顶点纹理提取应用地形高度场  40 1227</li>
+<li>镶嵌着色器的作用 1493 225</li>
+</ul>
+<p>进一步</p>
+<ul>
+<li>GPU与图形渲染管线 530</li>
+<li>GPU并行性与计算 462</li>
+<li>GPU的演变和设计 903</li>
+<li>着色器编程： 1606 885</li>
+<li>着色器算法：1512</li>
+<li><a href="http://www.realtimerendering.com/">realtimerendering</a> 对应参考</li>
+</ul>
+<h1 id="习题">习题</h1>
+<ol>
+<li>请描述OpenGL中由顶点数据输入到绘制出一幅图像的具体过程</li>
+</ol>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#%E7%AC%AC%E4%B8%89%E7%AB%A0">第三章</a></li>
+<li><a href="#31-%E6%95%B0%E6%8D%AE%E5%B9%B6%E8%A1%8C%E6%9E%B6%E6%9E%84">3.1 数据并行架构</a></li>
+<li><a href="#32-gpu%E6%B5%81%E6%B0%B4%E7%BA%BF%E7%AE%80%E4%BB%8B">3.2 GPU流水线简介</a></li>
+<li><a href="#33-%E5%8F%AF%E7%BC%96%E7%A8%8B%E7%9D%80%E8%89%B2%E5%99%A8%E9%98%B6%E6%AE%B5">3.3 可编程着色器阶段</a></li>
+<li><a href="#34-%E5%8F%AF%E7%BC%96%E7%A8%8B%E7%9D%80%E8%89%B2%E5%92%8Capi%E6%BC%94%E5%8F%98">3.4 可编程着色和API演变</a></li>
+<li><a href="#35-%E9%A1%B6%E7%82%B9%E7%9D%80%E8%89%B2%E5%99%A8">3.5 顶点着色器</a></li>
+<li><a href="#36-%E9%95%B6%E5%B5%8C%E9%98%B6%E6%AE%B5">3.6 镶嵌阶段</a></li>
+<li><a href="#37-%E5%87%A0%E4%BD%95%E7%9D%80%E8%89%B2%E5%99%A8">3.7 几何着色器</a>
+<ul>
+<li><a href="#371-%E6%B5%81%E8%BE%93%E5%87%BA">3.7.1 流输出</a></li>
+</ul>
+</li>
+<li><a href="#38-%E5%83%8F%E7%B4%A0%E7%9D%80%E8%89%B2%E5%99%A8">3.8 像素着色器</a></li>
+<li><a href="#39%E5%90%88%E5%B9%B6%E9%98%B6%E6%AE%B5">3.9合并阶段</a></li>
+<li><a href="#310-%E8%AE%A1%E7%AE%97%E7%9D%80%E8%89%B2%E5%99%A8">3.10 计算着色器</a></li>
+<li><a href="#%E5%8F%82%E8%80%83">参考</a></li>
+<li><a href="#%E4%B9%A0%E9%A2%98">习题</a></li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://jhonprice.github.io/post/rtr4tu-xing-xuan-ran-guan-xian-v001/">
+              <h3 class="post-title">
+                RTR4：图形渲染管线 v0.01
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://jhonprice.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
